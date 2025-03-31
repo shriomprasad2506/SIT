@@ -8,12 +8,15 @@ import { useNavigate } from 'react-router-dom';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const LoginForm = () => {
+    useEffect(() => {
+        document.title = "SIT | Admin Login";
+    }, []);
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [captcha, setCaptcha] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false); // Track loading state
+    const [loading, setLoading] = useState(false); 
 
     // Initialize CAPTCHA engine
     useEffect(() => {
@@ -28,14 +31,14 @@ const LoginForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Proceed with the API request only if both username and password are filled
         if (!username || !password) {
             toast.error('Username and Password are required');
             reloadCaptcha()
             return;
         }
-        
+
         // Validate CAPTCHA
         if (!validateCaptcha(captcha)) {
             toast.error('Invalid CAPTCHA');
@@ -53,7 +56,7 @@ const LoginForm = () => {
             if (response.status === 200) {
                 sessionStorage.setItem('authToken', response.data.token);
                 toast.success('Login Successful!');
-                navigate('/dashboard');
+                navigate('/admin/dashboard');
             }
         } catch (err) {
             // Handling the error correctly
@@ -85,7 +88,7 @@ const LoginForm = () => {
                         Username
                     </label>
                     <div className="mt-1 relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 border-r pr-2">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700 sm:text-gray-400 border-r pr-2">
                             <FaUser />
                         </span>
                         <input
@@ -104,7 +107,7 @@ const LoginForm = () => {
                         Password
                     </label>
                     <div className="mt-1 relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 border-r pr-2">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700 sm:text-gray-400 border-r pr-2">
                             <FaLock />
                         </span>
                         <input
@@ -117,7 +120,7 @@ const LoginForm = () => {
                         />
                         <span
                             onClick={() => setShowPassword(!showPassword)} // Toggle visibility
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700 sm:text-gray-400 cursor-pointer"
                         >
                             {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Show different icon */}
                         </span>
@@ -149,9 +152,8 @@ const LoginForm = () => {
                 <div className="flex items-center justify-center mb-4">
                     <button
                         type="submit"
-                        className={`bg-black w-full text-lg  text-white py-2 px-4 rounded-md transition-all duration-200 ${
-                            loading ? 'bg-gray-400 hover:cursor-not-allowed' : 'hover:bg-gray-800 hover:cursor-pointer'
-                        }`}
+                        className={`bg-black w-full text-lg  text-white py-2 px-4 rounded-md transition-all duration-200 ${loading ? 'bg-gray-400 hover:cursor-not-allowed' : 'hover:bg-gray-800 hover:cursor-pointer'
+                            }`}
                         disabled={loading} // Disable the button when loading
                     >
                         {loading ? (

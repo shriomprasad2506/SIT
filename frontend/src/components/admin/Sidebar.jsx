@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
-    const [isExpanded, setIsExpanded] = useState(false); // Initially expanded
+    const [isExpanded, setIsExpanded] = useState(true); // Initially expanded
     const location = useLocation(); // Get current location (URL)
     const navigate = useNavigate()
     // Function to handle the screen size detection
@@ -70,7 +70,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 onClick={() => setIsSidebarOpen(false)}
             />
             <div className="gap-1 items-center justify-center hidden xl:flex">
-                <img src='/sit.jpg' className="sm:size-12 size-6 rounded-full" />
+                <img src='/sit.png' className="sm:size-12 size-6 rounded-full" />
                 <p
                     className="sm:text-sm text-xs sm:ml-1 text-center"
                     style={{ fontFamily: "MuseoModerno" }}
@@ -79,11 +79,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                 </p>
             </div>
             <div className="flex flex-col sm:gap-8 gap-4 my-4 relative">
-                <a href='/dashboard' className={`${style1} ${isActive('/dashboard') ? activeStyle : ''}`}>
+                <a href='/admin/dashboard' className={`${style1} ${isActive('/dashboard') ? activeStyle : ''}`}>
                     <MdDashboard />
                     {isExpanded && <span className={`${style2}`}>Dashboard</span>}
                 </a>
-                <a href='/events' className={`${style1} ${isActive('/events') ? activeStyle : ''}`}>
+                <a href='/admin/events' className={`${style1} ${isActive('/events') ? activeStyle : ''}`}>
                     <MdEmojiEvents />
                     {isExpanded && <span className={`${style2}`}>Events</span>}
                 </a>
