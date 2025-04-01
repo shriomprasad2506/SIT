@@ -57,7 +57,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     return (
         <div
-            className={`sm:pl-2 pl-1 py-4 bg-[#F7F7F7] overflow-clip whitespace-nowrap sm:sticky fixed top-0 flex flex-col justify-between min-h-[380px] h-screen transition-all duration-200 ${isExpanded ? 'xl:w-[240px] sm:w-[250px] w-[100px]' : 'w-[50px]'}
+            className={`sm:pl-2 pl-1 z-[50] py-4 bg-[#F7F7F7] overflow-clip whitespace-nowrap sm:sticky fixed top-0 flex flex-col justify-between min-h-[380px] h-screen transition-all duration-200 ${isExpanded ? 'xl:w-[240px] sm:w-[250px] w-[100px]' : 'w-[50px]'}
             ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} sm:translate-x-0`}
             style={{ fontFamily: "Inter" }}
         >
@@ -78,7 +78,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     Siliguri Institute of<br/> Technology
                 </p>
             </div>
-            <div className="flex flex-col sm:gap-8 gap-4 my-4 relative">
+            <div className="flex flex-col sm:gap-8 gap-4 my-4 relative ">
                 <a href='/admin/dashboard' className={`${style1} ${isActive('/dashboard') ? activeStyle : ''}`}>
                     <MdDashboard />
                     {isExpanded && <span className={`${style2}`}>Dashboard</span>}
@@ -87,15 +87,15 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     <MdEmojiEvents />
                     {isExpanded && <span className={`${style2}`}>Events</span>}
                 </a>
-                <a className={`${style1} ${isActive('/news') ? activeStyle : ''}`}>
-                    <ImNewspaper />
+                <a href='/admin/news' className={`${style1} ${isActive('/news') ? activeStyle : ''}`}>
+                    <ImNewspaper className="pl-1" />
                     {isExpanded && <span className={`${style2}`}>News</span>}
                 </a>
-                <a className={`${style1} ${isActive('/announcements') ? activeStyle : ''}`}>
+                <a href="/admin/announcements" className={`${style1} ${isActive('/announcements') ? activeStyle : ''}`}>
                     <MdAnnouncement />
                     {isExpanded && <span className={`${style2}`}>Announcements</span>}
                 </a>
-                <a className={`${style1} ${isActive('/faculty') ? activeStyle : ''}`}>
+                <a href="/admin/faculty" className={`${style1} ${isActive('/faculty') ? activeStyle : ''}`}>
                     <IoIosPeople />
                     {isExpanded && <span className={`${style2}`}>Faculty</span>}
                 </a>

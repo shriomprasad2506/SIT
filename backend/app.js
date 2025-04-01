@@ -17,7 +17,7 @@ app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/news', newsRoutes);
-app.use('/api/faculty-staff', facultyStaffRoutes);
+app.use('/api/faculty', facultyStaffRoutes);
 app.use('/api/announcements', announcementsRoutes);
 app.use('/api/contact', contactRoutes);
 app.use(errorMiddleware);

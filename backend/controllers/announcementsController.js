@@ -1,34 +1,51 @@
-const db = require('../config/db'); // Database connection
-const uploadToSufy = require('../utils/uploadToSufy'); // Utility for uploading images
+const db = require('../config/db');
+const uploadToSufy = require('../utils/uploadToSufy'); // Assuming file upload is handled via Sufy
 
 // Fetch announcements with pagination and structured response
 const fetchAnnouncements = async (req, res) => {
     try {
-        // Get query parameters for pagination and sorting (defaults)
-        const { page = 1, limit = 10, sort_by = 'announced_at', order = 'ASC' } = req.query;
+        const { page = 1, limit = 10, sort_by = 'announced_at', order = 'DESC', search = '' } = req.query;
 
-        // Validate pagination and sorting parameters
         const pageNumber = Math.max(1, parseInt(page));
-        const pageLimit = Math.max(1, Math.min(100, parseInt(limit))); // Limit max results to 100
-        const sortColumn = ['announced_at', 'title', 'posted_by'].includes(sort_by) ? sort_by : 'announced_at';
+        const pageLimit = Math.max(1, Math.min(100, parseInt(limit)));
+        const sortColumn = ['announced_at', 'title'].includes(sort_by) ? sort_by : 'announced_at';
         const sortOrder = ['ASC', 'DESC'].includes(order.toUpperCase()) ? order : 'ASC';
 
-        // Calculate offset for pagination
         const offset = (pageNumber - 1) * pageLimit;
 
-        // Query to fetch paginated announcements with sorting
+        let queryParams = [];
+        let searchFilter = '';
+
+        // If a search term is provided, use the LIKE operator to search title and content
+        if (search) {
+            searchFilter = `title LIKE ? OR content LIKE ?`;
+            queryParams.push(`%${search}%`, `%${search}%`);
+        }
+
+        // Build the WHERE clause for search
+        let whereClause = '';
+        if (searchFilter) {
+            whereClause = `WHERE ${searchFilter}`;
+        }
+
+        queryParams.push(pageLimit, offset); // Add pagination parameters to the query
+
+        // Fetch announcements from the database
         const [announcements] = await db.query(
-            `SELECT announcement_id, title, content, announced_at, posted_by, image
+            `SELECT announcement_id, title, content, announced_at, posted_by, document
              FROM Announcements
+             ${whereClause}
              ORDER BY ${sortColumn} ${sortOrder}
              LIMIT ? OFFSET ?`,
-            [pageLimit, offset]
+            queryParams
         );
 
-        // Query to get total count of announcements for pagination info
-        const [[{ total_count }]] = await db.query('SELECT COUNT(*) AS total_count FROM Announcements');
+        // Fetch total count of announcements for pagination
+        const [[{ total_count }]] = await db.query(
+            `SELECT COUNT(*) AS total_count FROM Announcements ${whereClause}`,
+            queryParams.slice(0, queryParams.length - 2) // Use the query params excluding pagination parameters for the count
+        );
 
-        // Formatting the response
         const response = {
             announcements,
             pagination: {
@@ -39,41 +56,31 @@ const fetchAnnouncements = async (req, res) => {
             },
         };
 
-        // Return structured response with announcements and pagination metadata
         res.json(response);
     } catch (error) {
-        // Log the error for debugging purposes
         console.error('Error fetching announcements:', error);
-
-        // Send a structured error response
-        res.status(500).json({
-            message: 'Error fetching announcements',
-            error: error.message,
-        });
+        res.status(500).json({ message: 'Error fetching announcements', error: error.message });
     }
 };
 
-// Create announcement (admin check is handled by middleware)
+// Create an announcement (admin check is handled by middleware)
 const createAnnouncement = async (req, res) => {
     try {
-        // Check if all required details are provided
-        const { title, content, posted_by } = req.body;
-
+        const { title, content, posted_by,documentUrl } = req.body;
         if (!title || !content || !posted_by) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        // If file is uploaded, we use the file path or upload to S3
-        let imagePath = '';
+        // If file is uploaded, use the file path or upload to S3
+        let documentPath = documentUrl||'';
         if (req.file) {
-            // Example: Upload to S3 (use uploadToSufy if you want to upload to S3)
-            imagePath = await uploadToSufy(req.file.path, 'announcements', 'image/jpeg');
+            documentPath = await uploadToSufy(req.file.path, 'announcements', 'application/pdf');
         }
 
         // Insert new announcement into the database
         const [result] = await db.query(
-            'INSERT INTO Announcements (title, content, posted_by, image) VALUES (?, ?, ?, ?)',
-            [title, content, posted_by, imagePath]
+            'INSERT INTO Announcements (title, content, posted_by, document) VALUES (?, ?, ?, ?)',
+            [title, content, posted_by, documentPath]
         );
 
         // Return a response with the newly created announcement
@@ -83,7 +90,112 @@ const createAnnouncement = async (req, res) => {
     }
 };
 
+// Fetch a specific announcement's details by announcement_id
+const fetchAnnouncementDetails = async (req, res) => {
+    try {
+        const { announcement_id } = req.params; // Extract announcement_id from URL parameters
+
+        if (!announcement_id || isNaN(announcement_id)) {
+            return res.status(400).json({ message: 'Invalid announcement ID' });
+        }
+
+        const [announcement] = await db.query(
+            `SELECT announcement_id, title, content, announced_at, posted_by, document
+             FROM Announcements
+             WHERE announcement_id = ?`,
+            [announcement_id]
+        );
+
+        if (announcement.length === 0) {
+            return res.status(404).json({ message: 'Announcement not found' });
+        }
+
+        res.json({ announcement: announcement[0] });
+    } catch (error) {
+        console.error('Error fetching announcement details:', error);
+        res.status(500).json({ message: 'Error fetching announcement details', error: error.message });
+    }
+};
+
+// Edit an existing announcement by announcement_id
+const editAnnouncement = async (req, res) => {
+    try {
+        const { announcement_id } = req.params;
+        const { title, content, posted_by, documentUrl } = req.body;
+
+        if (!title || !content || !posted_by) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        let documentPath = documentUrl || '';
+        if (req.file) {
+            // If a new document is uploaded, upload it to S3 and get the new document path
+            documentPath = await uploadToSufy(req.file.path, 'announcements', 'application/pdf');
+        }
+
+        // Update the announcement in the database
+        const [result] = await db.query(
+            `UPDATE Announcements 
+             SET title = ?, content = ?, posted_by = ?, document = ?
+             WHERE announcement_id = ?`,
+            [title, content, posted_by, documentPath, announcement_id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Announcement not found' });
+        }
+
+        res.json({ message: 'Announcement updated successfully' });
+    } catch (error) {
+        console.error('Error editing announcement:', error);
+        res.status(500).json({ message: 'Error editing announcement', error: error.message });
+    }
+};
+
+// Delete an announcement by announcement_id
+const deleteAnnouncement = async (req, res) => {
+    try {
+        const { announcement_id } = req.params;
+
+        if (!announcement_id || isNaN(announcement_id)) {
+            return res.status(400).json({ message: 'Invalid announcement ID' });
+        }
+
+        // Delete the announcement from the database
+        const [result] = await db.query('DELETE FROM Announcements WHERE announcement_id = ?', [announcement_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Announcement not found' });
+        }
+
+        res.json({ message: 'Announcement deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting announcement:', error);
+        res.status(500).json({ message: 'Error deleting announcement', error: error.message });
+    }
+};
+
+// Controller to fetch total count of announcements
+const fetchAnnouncementCounts = async (req, res) => {
+    try {
+        const [[{ total_count }]] = await db.query(
+            `SELECT COUNT(*) AS total_count FROM Announcements`
+        );
+
+        res.json({
+            total_count,
+        });
+    } catch (error) {
+        console.error('Error fetching announcement counts:', error);
+        res.status(500).json({ message: 'Error fetching announcement counts', error: error.message });
+    }
+};
+
 module.exports = {
     fetchAnnouncements,
-    createAnnouncement
+    createAnnouncement,
+    fetchAnnouncementDetails,
+    editAnnouncement,
+    deleteAnnouncement,
+    fetchAnnouncementCounts,
 };

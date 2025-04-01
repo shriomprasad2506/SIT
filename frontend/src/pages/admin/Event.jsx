@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FaSpinner } from 'react-icons/fa';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -16,7 +17,6 @@ const Event = () => {
         const fetchEvent = async () => {
             try {
                 const response = await axios.get(`${apiUrl}/api/events/${eventId}`);
-                console.log(response);
                 setEvent(response.data.event); // Store event data in state
             } catch (err) {
                 setError(err.message || 'An error occurred');
@@ -34,9 +34,7 @@ const Event = () => {
             document.title = `SIT | ${event?.event_name}`;
     }, [event]);
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
-    console.log(event);
+    if (loading) return <div className='text-5xl flex justify-center items-center mt-10'><FaSpinner className='animate-spin'/></div>;
 
     // Function to format a date object to "Month Day, Year at Hour:Minute AM/PM"
     const formatDateTime = (date) => {
@@ -77,7 +75,10 @@ const Event = () => {
     return (
         <div className='my-10 mx-4 max-w-[800px] flex gap-3 justify-center items-center flex-col place-self-center' style={{ fontFamily: "Montserrat" }}>
             <h1 className='sm:text-6xl text-4xl font-black'>{event?.event_name}</h1>
-            <img src={event?.image} className='w-full h-auto rounded-2xl' alt="Event" />
+            {
+                event?.image &&
+                <img src={event?.image} className='w-full h-auto rounded-2xl' alt="Event" />
+            }
             <p className='text-white sm:text-xl text-lg mt-6'>{event?.description}</p>
 
             <div className='text-white mt-4 sm:text-lg flex flex-col gap-1'>

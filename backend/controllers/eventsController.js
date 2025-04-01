@@ -205,10 +205,53 @@ const deleteEvent = async (req, res) => {
     }
 };
 
+// Controller to fetch total count of events based on their status (Ongoing, Upcoming, Past)
+const fetchEventCounts = async (req, res) => {
+    try {
+        const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');  // Get current date in UTC format
+
+        // Fetch the total count for ongoing events
+        const [[{ total_ongoing }]] = await db.query(
+            `SELECT COUNT(*) AS total_ongoing 
+             FROM Events 
+             WHERE event_date <= ? AND (event_date + INTERVAL duration MINUTE) >= ?`,
+            [currentDate, currentDate]
+        );
+
+        // Fetch the total count for past events
+        const [[{ total_past }]] = await db.query(
+            `SELECT COUNT(*) AS total_past 
+             FROM Events 
+             WHERE event_date + INTERVAL duration MINUTE < ?`,
+            [currentDate]
+        );
+
+        // Fetch the total count for upcoming events
+        const [[{ total_upcoming }]] = await db.query(
+            `SELECT COUNT(*) AS total_upcoming 
+             FROM Events 
+             WHERE event_date > ?`,
+            [currentDate]
+        );
+
+        // Respond with the counts for ongoing, past, and upcoming events
+        res.json({
+            total_ongoing,
+            total_past,
+            total_upcoming,
+            total_events: total_ongoing + total_past + total_upcoming,  // Total count of all events
+        });
+    } catch (error) {
+        console.error('Error fetching event counts:', error);
+        res.status(500).json({ message: 'Error fetching event counts', error: error.message });
+    }
+};
+
 module.exports = {
     fetchEvents,
     createEvent,
     fetchEventDetails,
     editEvent,
-    deleteEvent
+    deleteEvent,
+    fetchEventCounts
 };

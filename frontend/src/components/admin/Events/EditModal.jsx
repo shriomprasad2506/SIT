@@ -48,7 +48,7 @@ const EditModal = ({ isOpen, onClose, setRefresh, event }) => {
 
     // Logic to check if the event is fully defined (all fields filled)
     const isEventDefined = date && time && hours && minutes;
-
+    
     // Function to format the time in AM/PM format
     const formatTime = (timeString) => {
         const [hours, minutes] = timeString.split(":");
