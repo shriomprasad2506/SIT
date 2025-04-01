@@ -4,7 +4,7 @@ const router = express.Router();
 const upload = require('../middlewares/upload');
 
 const teachingController = require('../controllers/teachingStaffController');
-const nonTeachingController = require('../controllers/nonTeachingStaffController');
+const nonTeachingController = require('../controllers/nonteachingStaffController');
 
 const getDistinctDepartments = async (req, res) => {
     try {
