@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { fetchEvents, createEvent, fetchEventDetails, editEvent, deleteEvent, fetchEventCounts } = require('../controllers/eventsController');
+const { fetchEvents, createEvent, fetchEventDetails, editEvent, deleteEvent } = require('../controllers/eventsController');
 const upload = require('../middlewares/upload'); // Multer upload middleware
 const authenticateAndAuthorize = require('../middlewares/authenticateAndAuthorize'); // Authentication and authorization middleware
 
 // Route for fetching events (no authentication required)
 router.get('/', fetchEvents);
-
-router.get('/count', fetchEventCounts)
 
 // Route for fetching a specific event's details (no authentication required)
 router.get('/:event_id', fetchEventDetails);

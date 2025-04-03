@@ -76,4 +76,72 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+// Controller to fetch total count
+const fetchCounts = async (req, res) => {
+  try {
+    const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');  // Get current date in UTC format
+
+    // Fetch the total count for ongoing events
+    const [[{ total_ongoing }]] = await db.query(
+      `SELECT COUNT(*) AS total_ongoing 
+           FROM Events 
+           WHERE event_date <= ? AND (event_date + INTERVAL duration MINUTE) >= ?`,
+      [currentDate, currentDate]
+    );
+
+    // Fetch the total count for past events
+    const [[{ total_past }]] = await db.query(
+      `SELECT COUNT(*) AS total_past 
+           FROM Events 
+           WHERE event_date + INTERVAL duration MINUTE < ?`,
+      [currentDate]
+    );
+
+    // Fetch the total count for upcoming events
+    const [[{ total_upcoming }]] = await db.query(
+      `SELECT COUNT(*) AS total_upcoming 
+           FROM Events 
+           WHERE event_date > ?`,
+      [currentDate]
+    );
+
+    const [[{ total_news }]] = await db.query(
+      `SELECT COUNT(*) AS total_news 
+           FROM News`
+    );
+
+    const [[{ total_announcements }]] = await db.query(
+      `SELECT COUNT(*) AS total_announcements 
+           FROM Announcements`
+    );
+    const [[{ total_teachings }]] = await db.query(
+      `SELECT COUNT(*) AS total_teachings 
+           FROM Teaching_Staff`
+    );
+    const [[{ total_non_teachings }]] = await db.query(
+      `SELECT COUNT(*) AS total_non_teachings 
+           FROM Non_Teaching_Staff`
+    );
+    const [[{ total_new_contacts }]] = await db.query(
+      `SELECT COUNT(*) AS total_new_contacts 
+           FROM contact_us_form WHERE status = 'Unseen'`,
+    );
+    // Respond with the counts for ongoing, past, and upcoming events
+    res.json({
+      total_ongoing,
+      total_past,
+      total_upcoming,
+      total_events: total_ongoing + total_past + total_upcoming,
+      total_news,
+      total_announcements,  
+      total_teachings,
+      total_non_teachings,
+      total_new_contacts
+    });
+  } catch (error) {
+    console.error('Error fetching event counts:', error);
+    res.status(500).json({ message: 'Error fetching event counts', error: error.message });
+  }
+};
+
+module.exports = { register, login, fetchCounts };

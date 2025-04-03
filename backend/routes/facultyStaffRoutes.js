@@ -2,9 +2,9 @@ const db = require('../config/db');
 const express = require('express');
 const router = express.Router();
 const upload = require('../middlewares/upload');
-
+const authenticateAndAuthorize = require('../middlewares/authenticateAndAuthorize'); // Authentication and authorization middleware
 const teachingController = require('../controllers/teachingStaffController');
-const nonTeachingController = require('../controllers/nonteachingStaffController');
+const nonTeachingController = require('../controllers/nonTeachingStaffController');
 
 const getDistinctDepartments = async (req, res) => {
     try {
@@ -32,15 +32,15 @@ const getDistinctDepartments = async (req, res) => {
 };
 
 // 🚩 Teaching Staff Routes
-router.post('/teaching/', upload.single('photo'), teachingController.createTeachingStaff);
-router.put('/teaching/:id', upload.single('photo'), teachingController.editTeachingStaff);
-router.delete('/teaching/:id', teachingController.deleteTeachingStaff);
+router.post('/teaching/', authenticateAndAuthorize('admin'), upload.single('photo'), teachingController.createTeachingStaff);
+router.put('/teaching/:id', authenticateAndAuthorize('admin'), upload.single('photo'), teachingController.editTeachingStaff);
+router.delete('/teaching/:id', authenticateAndAuthorize('admin'), teachingController.deleteTeachingStaff);
 router.get('/teaching/', teachingController.getTeachingStaff);
 
 // 🚩 Non-Teaching Staff Routes
-router.post('/non_teaching/', upload.single('photo'), nonTeachingController.createNonTeachingStaff);
-router.put('/non_teaching/:id', upload.single('photo'), nonTeachingController.editNonTeachingStaff);
-router.delete('/non_teaching/:id', nonTeachingController.deleteNonTeachingStaff);
+router.post('/non_teaching/', authenticateAndAuthorize('admin'), upload.single('photo'), nonTeachingController.createNonTeachingStaff);
+router.put('/non_teaching/:id', authenticateAndAuthorize('admin'), upload.single('photo'), nonTeachingController.editNonTeachingStaff);
+router.delete('/non_teaching/:id', authenticateAndAuthorize('admin'), nonTeachingController.deleteNonTeachingStaff);
 router.get('/non_teaching/', nonTeachingController.getNonTeachingStaff);
 
 router.get('/departments', getDistinctDepartments)

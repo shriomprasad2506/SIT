@@ -61,10 +61,9 @@ const deleteNonTeachingStaff = async (req, res) => {
 
 const getNonTeachingStaff = async (req, res) => {
     try {
-        const { search, department } = req.query;
+        const { department, search } = req.query;
         let query = 'SELECT * FROM Non_Teaching_Staff';
         let values = [];
-
         // Apply department filter if present
         if (department) {
             query += ' WHERE department_name = ?';
@@ -93,7 +92,6 @@ const getNonTeachingStaff = async (req, res) => {
             acc[deptName].push(faculty);
             return acc;
         }, {});
-
         res.status(200).json({ data: groupedByDepartment });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching non-teaching staff', error: error.message });

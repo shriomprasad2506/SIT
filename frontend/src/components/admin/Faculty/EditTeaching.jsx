@@ -53,7 +53,7 @@ const EditTeaching = ({ isOpen, onClose, setRefresh, faculty }) => {
         formData.append("designation", designation);
         formData.append("email", email);
         formData.append("degrees", degrees);
-        formData.append("photo_url", photoPreview)
+        formData.append("photoUrl", photoPreview)
         if (photo) formData.append("photo", photo);
 
         setLoading(true);

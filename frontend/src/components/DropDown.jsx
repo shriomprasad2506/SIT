@@ -28,13 +28,13 @@ const Dropdown = ({ placeholder, options, selected, onSelect, className }) => {
     }, []);
 
     return (
-        <div className={`relative inline-block rounded ${className} bg-white`} ref={dropdownRef}>
+        <div className={`relative inline-block rounded border border-gray-300 ${className}  bg-white`} ref={dropdownRef}>
             <div
-                className="flex items-center justify-between p-2 border border-gray-300 rounded cursor-pointer w-full" // Set fixed width
+                className="flex items-center justify-between p-2 rounded cursor-pointer w-full" // Set fixed width
                 onClick={toggleDropdown}
             >
-                <span className='w-full text-black whitespace-nowrap text-ellipsis overflow-hidden'>{selected ? selected.label : placeholder}</span>
-                <FaChevronDown className="w-5 h-5 text-gray-500" />
+                <span className={`w-full ${!selected ? 'text-gray-500':'text-black'} whitespace-nowrap text-ellipsis overflow-hidden`}>{selected ? selected.label : placeholder}</span>
+                <FaChevronDown className={`w-5 h-5 text-gray-500 ${isOpen?'rotate-180':''} transition-all duration-200`} />
             </div>
             {isOpen && options.length>0 && (
                 <div className="absolute left-0 z-10 mt-1 bg-white border border-gray-300 rounded shadow-lg w-full">

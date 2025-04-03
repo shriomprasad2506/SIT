@@ -5,9 +5,12 @@ import { ImNewspaper } from "react-icons/im";
 import { MdAnnouncement } from "react-icons/md";
 import { IoIosPeople, IoMdClose } from "react-icons/io";
 import { RiLogoutCircleRLine } from "react-icons/ri";
+import { IoMailSharp } from "react-icons/io5";
 import { FaChevronRight } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import axios from "axios";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     const [isExpanded, setIsExpanded] = useState(true); // Initially expanded
@@ -35,10 +38,29 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             window.removeEventListener("resize", checkScreenSize);
         };
     }, []);
+    const [count, setCount] = useState(0)
+    useEffect(() => {
+        const fetchEventCounts = async () => {
+            const token = sessionStorage.getItem("authToken");
+            try {
+                const response = await axios.get(`${apiUrl}/api/auth/count`, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setCount(response.data.total_new_contacts); // Update state with the fetched data
+            } catch (error) {
+                console.error("Error fetching event counts:", error);
+            }
+        };
 
+        fetchEventCounts();
+    }, []);
+    console.log(count)
     const style1 = 'flex xl:flex-row flex-col text-[#B3C0B9] hover:text-black sm:text-3xl text-xl hover:cursor-pointer flex gap-1 items-center transition-all duration-200';
     const style2 = 'md:text-lg sm:text-base text-xs transition-all duration-300';
-    const activeStyle = 'text-[#1c8252!important] border-l-3 border-[#1c8252]'; // Active link style
+    const activeStyle = 'text-[#0f1f74!important] border-l-3 border-[#0f1f74]'; // Active link style
 
     const toggleSidebar = () => {
         setIsExpanded(!isExpanded);
@@ -51,8 +73,8 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     const logOut = () => {
         sessionStorage.removeItem('authToken')
-        navigate('/login')
         toast.success("Logged Out")
+        navigate('/login');
     }
 
     return (
@@ -75,7 +97,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     className="sm:text-sm text-xs sm:ml-1 text-center"
                     style={{ fontFamily: "MuseoModerno" }}
                 >
-                    Siliguri Institute of<br/> Technology
+                    Siliguri Institute of<br /> Technology
                 </p>
             </div>
             <div className="flex flex-col sm:gap-8 gap-4 my-4 relative ">
@@ -99,8 +121,15 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
                     <IoIosPeople />
                     {isExpanded && <span className={`${style2}`}>Faculty</span>}
                 </a>
-
-
+                <a href="/admin/contacts" className={`${style1} ${isActive('/contacts') ? activeStyle : ''}`}>
+                    <IoMailSharp />
+                    {isExpanded && <span className={`${style2} relative`}>Mails
+                        {
+                            count !== 0 &&
+                            <span className="absolute text-white -top-2 -right-5 rounded-full size-5 bg-[#0f1f74] flex justify-center items-center">{count}</span>
+                        }
+                    </span>}
+                </a>
             </div>
             <div className="flex gap-1 items-center text-[#B3C0B9] hover:text-red-500 cursor-pointer transition-all duration-300" onClick={logOut}>
                 <RiLogoutCircleRLine className="sm:text-3xl text-xl" />

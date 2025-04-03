@@ -12,7 +12,6 @@ const FacultyList = ({ category, refresh, setRefresh, searchTerm, department }) 
     const [nonTeachingFaculty, setNonTeachingFaculty] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
     const fetchFaculty = async (search = '') => {
         setError(null);
         setLoading(true);
@@ -34,7 +33,7 @@ const FacultyList = ({ category, refresh, setRefresh, searchTerm, department }) 
                 setNonTeachingFaculty({})
             } else if (category.value == 2) {
                 const response2 = await axios.get(`${apiUrl}/api/faculty/non_teaching`, {
-                    params: { search },
+                    params: { search, department },
                 });
                 setNonTeachingFaculty(response2.data.data);
                 setTeachingFaculty({});

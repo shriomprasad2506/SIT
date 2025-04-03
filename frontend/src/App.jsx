@@ -7,6 +7,8 @@ import './App.css';
 import LoginForm from './pages/LoginForm';
 import PrivateRoute from './components/PrivateRoute';
 
+import Home from "./pages/Home";
+import ContactUs from './pages/ContactUs';
 import Dashboard from './pages/admin/Dashboard';
 import Events from './pages/admin/Events';
 import Event from './pages/admin/Event';
@@ -15,13 +17,17 @@ import NewsPage from './pages/admin/NewsPage';
 import Announcements from './pages/admin/Announcements';
 import Announcement from './pages/admin/Announcement';
 import Faculties from './pages/admin/Faculties';
-
+import Contact from './pages/admin/Contact';
 const App = () => {
   const isLoggedIn = !!sessionStorage.getItem('authToken'); // Check if the user is logged in
   return (
     <Router>
       <ToastContainer />
       <Routes>
+        <Route path='/' element=<Home/>/>
+
+        <Route path='/contact-us' element=<ContactUs/>/>
+
         {/* If the user is logged in, redirect to the dashboard, else show the login page */}
         <Route path="/login" element={isLoggedIn ? <Navigate to="/admin/dashboard" /> : <LoginForm />} />
 
@@ -37,6 +43,8 @@ const App = () => {
         <Route path="/admin/announcements/:announcementId" element={<PrivateRoute element={<Announcement />} />} />
 
         <Route path="/admin/faculty" element={<PrivateRoute element={<Faculties />} />} />
+
+        <Route path="/admin/contacts" element={<PrivateRoute element={<Contact />} />} />
 
         {/* /not-found */}
 

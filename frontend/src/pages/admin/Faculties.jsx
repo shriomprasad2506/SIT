@@ -12,7 +12,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 const Faculties = () => {
     useEffect(() => {
-        document.title = "SIT | Events";
+        document.title = "SIT | Faculty";
     }, []);
     const [searchTerm, setSearchTerm] = useState('');
     const [category, setCategory] = useState('');
@@ -31,14 +31,14 @@ const Faculties = () => {
                 console.log(response.data.teachingDepartments)
             } else if (category.value == 2) {
                 setDepartments(response.data.nonTeachingDepartments)
-            } 
+            }
         }
         fetchDepartments(category)
     }, [category])
     const handleSelect = (option) => {
         setCategory(option);
     };
-    const handleDepartment = (department)=>{
+    const handleDepartment = (department) => {
         setDepartment(department)
     }
     const [formModal, setFormModal] = useState(false);
@@ -47,7 +47,7 @@ const Faculties = () => {
     const [refresh, setRefresh] = useState(false);
     return (
         <div className="md:p-5 p-3 w-full">
-            <p className="text-3xl font-semibold text-black">Events</p>
+            <p className="text-3xl font-semibold text-black">Faculty</p>
 
             <div className="flex justify-between mt-5 gap-3">
                 <Dropdown options={categories} selected={category} placeholder="Select an option" onSelect={handleSelect} className={`w-40`} />
@@ -77,7 +77,13 @@ const Faculties = () => {
                 </button>
             </div>
             <div className="flex md:hidden relative w-[100%] mt-5">
-                <input type="text" className={`px-4 py-2 rounded-2xl w-full outline-none bg-white`} placeholder="Search" />
+                <input
+                    type="text"
+                    className={`px-4 py-2 rounded-2xl w-full outline-none bg-white`}
+                    placeholder="Search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
                 <CiSearch className={`text-2xl absolute right-0 top-1/2 -translate-1/2`} />
             </div>
             <List department={department.label} category={category} refresh={refresh} setRefresh={setRefresh} searchTerm={searchTerm} />
